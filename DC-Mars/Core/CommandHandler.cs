@@ -40,8 +40,10 @@ namespace DC_Mars.Core
                   message.Author.IsBot)
                 return;
 
+            // Create new CommandContext that we can pass to the command processor
             var context = new SocketCommandContext(_client, message);
 
+            // Execute Command Processor in Asynchronous Mode
             await _commands.ExecuteAsync(context: context, argPos: argPos, services: null);
         }
     }
