@@ -10,7 +10,7 @@ namespace DC_Mars.Debug
 {
     internal class Logging
     {
-        private Logger logs = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+        private Logger logs = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Console().CreateLogger();
 
         // Logs messages from Discord.NET
         public Task LogSys(LogMessage msg)
@@ -33,26 +33,39 @@ namespace DC_Mars.Debug
         }
 
         // Log custom messages
-        public Task LogCustom(string logMessage, string severity)
+        public async Task LogCustom(string logMessage, int severity)
         {
-            switch (severity.ToLower())
+            switch (severity)
             {
-                case "debug":
+                //Make a log wall to prevent immigrant bugs from sneaking into the Program
+                //And obviously make them pay for it.
+                //Debug
+                case 0:
                     logs.Debug(logMessage);
+                    //LogToFile(logMessage);
                     break;
-
-                case "fatal":
+                //Fatal
+                case 1:
                     logs.Fatal(logMessage);
+                    Environment.Exit(1);
+                    //LogToFile(logMessage);
                     break;
-
-                case "info":
+                //Info
+                case 2:
                     logs.Information(logMessage);
+                    //LogToFile(logMessage);
                     break;
-
-                case "error":
+                //Error
+                case 3:
                     logs.Error(logMessage);
+                    //LogToFile(logMessage);
                     break;
             }
+        }
+
+        public Task LogToFile(string logMessage)
+        {
+            // TODO: Implement logging to file.
             return Task.CompletedTask;
         }
     }
