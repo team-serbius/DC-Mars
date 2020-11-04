@@ -1,9 +1,0 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DC_Mars.Settings" GeneratedClassName="Connection">
-  <Profiles />
-  <Settings>
-    <Setting Name="token" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">NzY5ODQ3MjUyMzczNjAyMzMy.X5U-IA.q06A94q3MTlEJ71K8TGWitwML8s</Value>
-    </Setting>
-  </Settings>
-</SettingsFile>

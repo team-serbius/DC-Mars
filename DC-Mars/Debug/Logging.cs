@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace DC_Mars.Debug
 {
-    internal class Logging
+    public class Logging
     {
         private Logger logs = new LoggerConfiguration().MinimumLevel.Verbose().WriteTo.Console().CreateLogger();
 

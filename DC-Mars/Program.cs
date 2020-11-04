@@ -22,41 +22,8 @@ namespace DC_Mars
 {
     internal class Program
     {
-        [STAThread]
-        private static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
+        private static async Task Main(string[] args) => await Startup.RunAsync(args);
 
-        private DiscordSocketClient _client;
-        private CommandService _commands;
         private Logging logger = new Logging();
-
-        public async Task MainAsync()
-        {
-            Console.Title = "DC-MARS";
-            // Create new client for connecting to the Discord Gateway
-            _client = new DiscordSocketClient();
-            _commands = new CommandService();
-
-            // Send log events to our Logging class
-            _client.Log += logger.LogSys;
-
-            // Discord Bot Token
-            var token = Settings.Connection.Default.token;
-
-            await _client.LoginAsync(TokenType.Bot, token);
-            await _client.StartAsync();
-
-            logger.LogCustom("[DEBUG] Initialization starts", 0);
-            await Initialize();
-            logger.LogCustom("[DEBUG] Initialization ends", 0);
-
-            await Task.Delay(-1);
-        }
-
-        private async Task Initialize()
-        {
-            CommandHandler CommandSystem = new CommandHandler(_client, _commands);
-            await logger.LogCustom("[DEBUG] CommandHandler Created", 0);
-            await CommandSystem.InstallCommandsAsync();
-        }
     }
 }
