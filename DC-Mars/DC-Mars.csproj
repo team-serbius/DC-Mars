@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>DC_Mars</RootNamespace>
     <StartupObject>DC_Mars.Program</StartupObject>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,12 +26,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Settings\" />
+    <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="_config.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Settings\" />
   </ItemGroup>
 </Project>

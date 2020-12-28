@@ -1,15 +1,13 @@
 ﻿using DC_Mars.Debug;
-using System;
-using System.Text;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Collections;
-using System.Diagnostics;
-using System.Linq;
-using Newtonsoft.Json;
 using Discord.Commands;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DC_Mars.Modules
 {
@@ -128,41 +126,93 @@ namespace DC_Mars.Modules
             public List<object> recordings { get; set; }
         }
 
-        [Command("loadpiczelAPI")]
-        public async Task loadAPI()
+        [Serializable]
+        public class Streamer
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            Stopwatch sw1 = Stopwatch.StartNew();
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
-            HttpResponseMessage response = await client.GetAsync("https://piczel.tv/api/streams?followedStreams=false&live_only=false&sfw=false");
-            if (!response.IsSuccessStatusCode)
+            public string username { get; set; }
+            public string service { get; set; }
+        }
+
+        public List<PiczelRoot> piczelData;
+
+        private string streamersAggregated = "";
+
+        [Command("piczelAPI")]
+        public async Task PiczelAPI()
+        {
+            try
             {
-                await logger.LogCustom($"[CORE-ERR] Error: {response.StatusCode}\nReason: {response.ReasonPhrase}", 2);
-                await Context.Channel.SendMessageAsync($"Error fetching Web API.\n" +
-                                                        $"Server returned: {response.StatusCode}\n" +
-                                                        $"{response.ReasonPhrase}");
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls;
+                HttpResponseMessage response = await client.GetAsync("https://piczel.tv/api/streams?followedStreams=false&live_only=false&sfw=false");
+                if (!response.IsSuccessStatusCode)
+                {
+                    await logger.LogCustom($"[CORE-ERR] Error: {response.StatusCode}\nReason: {response.ReasonPhrase}", 2).ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"Error fetching Web API.\n" +
+                                                           $"Server returned: {(int)response.StatusCode} - {response.ReasonPhrase}").ConfigureAwait(false);
+                }
+                await Context.Channel.SendMessageAsync($"[DEBUG]------\n" +
+                                                       $"Server returned: {response.StatusCode} - {response.ReasonPhrase}").ConfigureAwait(false);
+                if (response != null)
+                {
+                    //var isLooped = true;
+                    var jsonString = await response.Content.ReadAsStringAsync();
+
+                    /*if (isLooped)
+                    {
+                        piczelData = JsonConvert.DeserializeObject<List<PiczelRoot>>(jsonString);
+                        if (loadAPI(piczelData))
+                        {
+                            await Context.Channel.SendMessageAsync($"[DEBUG] API succesfully loaded into memory and has {piczelData.Count} elements.").ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("[CORE-ERR] Error: Could not load API in memory.");
+                            isLooped = false;
+                        }
+                    }*/
+                    piczelData = JsonConvert.DeserializeObject<List<PiczelRoot>>(jsonString);
+                    if (loadAPI(piczelData))
+                    {
+                        await Context.Channel.SendMessageAsync($"[DEBUG] API succesfully loaded into memory and has {piczelData.Count} elements.").ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("[CORE-ERR] Error: Could not load API in memory.");
+                        //isLooped = false;
+                    }
+                    //PiczelRoot result = JsonConvert.DeserializeObject<PiczelRoot>(jsonString.Substring(2, jsonString.Length - 3));
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("[CORE-ERR] Could not connect to the Piczel server.");
+                }
             }
-            sw.Stop();
-            await Context.Channel.SendMessageAsync($"[DEBUG]------\n" +
-                                                   $"Server returned: {response.StatusCode}\n" +
-                                                   $"{response.ReasonPhrase}\n\n" +
-                                                   $"API Download took: {sw.ElapsedMilliseconds}ms.", false);
-            if (response != null)
+            catch (Exception e)
             {
-                var jsonString = await response.Content.ReadAsStringAsync();
-                try
-                {
-                    PiczelRoot result = JsonConvert.DeserializeObject<PiczelRoot>(jsonString);
-                    await Context.Channel.SendMessageAsync("[CORE-DBG] Success. API information loaded into Mars.");
-                }
-                catch (Exception e)
-                {
-                    await logger.LogCustom($"Error: {e.Message}", 2);
-                    await Context.Channel.SendMessageAsync($"[CORE-ERR] Critical Exception:\n {e.Message}");
-                }
+                await Context.Channel.SendMessageAsync($"[CORE-ERR] Critical error: {e.Message}");
             }
-            sw1.Stop();
-            await Context.Channel.SendMessageAsync($"[DEBUG] Process took {sw1.ElapsedMilliseconds}ms to complete.");
+        }
+
+        [Command("watch")]
+        public async Task registerStreamer(string username, string service)
+        {
+            Streamer streamerToAdd = new Streamer() { username = username, service = service };
+            await Context.Channel.SendMessageAsync($"[DEBUG] Object created: Streamer.username: {streamerToAdd.username}, Streamer.service: {streamerToAdd.service}").ConfigureAwait(false);
+        }
+
+        private bool loadAPI(List<PiczelRoot> list)
+        {
+            try
+            {
+                piczelData = list;
+                logger.LogCustom($"List has been loaded and contains {piczelData.Count} elements.", 0);
+                return true;
+            }
+            catch (Exception e)
+            {
+                logger.LogCustom($"[CORE-ERR] {e.Message}", 1);
+                return false;
+            }
         }
     }
 }

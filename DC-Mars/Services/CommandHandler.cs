@@ -21,6 +21,7 @@ namespace DC_Mars.Core
         public static IConfigurationRoot _config;
 
         public Logging logger = new Logging();
+        public bool isReconnection = false;
 
         public CommandHandler(DiscordSocketClient discord, CommandService commands, IConfigurationRoot config, IServiceProvider provider)
         {
@@ -30,6 +31,7 @@ namespace DC_Mars.Core
             _commands = commands;
 
             _discord.Ready += OnReady;
+            _discord.Connected += OnConnection;
             _discord.MessageReceived += OnMessageReceived;
         }
 
@@ -55,7 +57,24 @@ namespace DC_Mars.Core
 
         private async Task OnReady()
         {
-            await logger.LogCustom($"[DEBUG] Connected to Gateway as {_discord.CurrentUser.Username}#{_discord.CurrentUser.Discriminator}", 0);
+            await logger.LogCustom($"[DEBUG] Client initialized as {_discord.CurrentUser.Username}#{_discord.CurrentUser.Discriminator}", 0);
+        }
+
+        private async Task OnConnection()
+        {
+            if (!isReconnection)
+            {
+                await logger.LogCustom($"[DEBUG] Client connected to the Gateway.", 0);
+            }
+            else
+            {
+                await logger.LogCustom($"[DEBUG] Client has reconnected to the gateway successfully.", 0);
+            }
+        }
+
+        private async void OnDisconnection()
+        {
+            await logger.LogCustom($"[DEBUG] Client disconnected from the Gateway.", 0);
         }
     }
 }

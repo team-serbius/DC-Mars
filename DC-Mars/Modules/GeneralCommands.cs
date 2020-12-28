@@ -19,6 +19,13 @@ namespace DC_Mars.Modules
             await Context.Channel.SendMessageAsync($"[DEBUG] Response took: {sw.ElapsedMilliseconds}ms");
         }
 
+        [Command("beak")]
+        public async Task petBeak()
+        {
+            await Context.Channel.SendMessageAsync($"ATTENTION EVERYONE.\n" +
+                                                   $"THE BEAK HAS BEEN PET.");
+        }
+
         [Command("embedtest")]
         public async Task embedtest()
         {
